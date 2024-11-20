@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
 import { DatabaseModule } from './database/database.module';
 import { FxqlModule } from './fxql/fxql.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
@@ -14,6 +15,7 @@ import { ApiKeyGuard } from './common/guards/api-key.guard';
     DatabaseModule, 
     FxqlModule
   ],
+  controllers: [AppController],
   providers: [
     {
       provide: APP_GUARD,
