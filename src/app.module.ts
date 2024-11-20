@@ -21,10 +21,6 @@ import { ApiKeyGuard } from './common/guards/api-key.guard';
       provide: APP_GUARD,
       useClass: ThrottlerGuard
     },
-    {
-      provide: APP_GUARD,
-      useClass: ApiKeyGuard
-    }
   ],
 })
 
