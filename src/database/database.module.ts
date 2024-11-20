@@ -9,14 +9,20 @@ dotenv.config();
     imports: [
         TypeOrmModule.forRoot({
             type: 'postgres',
-            host: process.env.DB_HOST || 'localhost',
-            port: parseInt(process.env.DB_PORT, 10) || 5432,
-            username: process.env.DB_USERNAME || 'fxql_user',
-            password: process.env.DB_PASSWORD || 'securepassword',
-            database: process.env.DB_NAME || 'fxql_db',
+            host: process.env.DB_HOST,
+            port: parseInt(process.env.DB_PORT, 10),
+            username: process.env.DB_USERNAME,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_DATABASE,
+            // url: process.env.DATABASE_URL,
             entities: [FxqlEntry],
             synchronize: false,
-            autoLoadEntities: false
+            autoLoadEntities: false,
+            extra: {
+                ssl: {
+                    rejectUnauthorized: false,
+                },
+            }
         }),
     ],
 })

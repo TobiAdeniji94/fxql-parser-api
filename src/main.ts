@@ -10,7 +10,7 @@ async function bootstrap() {
   app.use(helmet());
 
   dotenv.config();
-
+  
   const config = new DocumentBuilder()
     .setTitle('Foreign Exchange Query Language Parser')
     .setDescription('API documentation for FXQL service')
