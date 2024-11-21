@@ -38,7 +38,7 @@ The **FXQL Parser API** is a robust and scalable backend service that processes 
 1. Clone the repository:
    ```bash
    git clone https://github.com/TobiAdeniji94/fxql-parser-api.git
-   cd fxql-parser
+   cd fxql-parser-api
    ```
 
 2. Install dependencies:
@@ -85,7 +85,7 @@ The **FXQL Parser API** is a robust and scalable backend service that processes 
 Processes FXQL statements, validates them, and saves valid entries to the database.
 
 #### **Headers**:
-- `x-api-key`: Required. A valid API key. Go to [How It Works](#how-it-works) to find out how it works.
+- `x-api-key`: Required. A valid API key. Go to [How It Works](#how-it-works) to find out how to set it up.
 
 #### **Request Body**:
 ```json
