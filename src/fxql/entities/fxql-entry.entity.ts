@@ -7,8 +7,8 @@ import {
 
 @Entity('fxql_entries')
 export class FxqlEntry {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  EntryId: string;
 
   @Column({ type: 'char', length: 3 })
   sourceCurrency: string;

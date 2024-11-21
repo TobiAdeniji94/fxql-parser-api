@@ -1,73 +1,175 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+### FXQL Parser Documentation
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+---
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## **Project Overview**
 
-## Description
+The FXQL Parser is a backend application developed in NestJS and TypeScript that parses and validates Foreign Exchange Query Language (FXQL) statements. These statements are submitted by Bureau De Change (BDC) operations to standardize and manage exchange rate information in a centralized system.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+---
 
-## Installation
+### Access the API
 
-```bash
-$ npm install
+- API Base URL: `https://fxql-backend-akjc.onrender.com/`
+
+---
+
+### Swagger Documentation
+
+- API Base URL: `https://fxql-backend-akjc.onrender.com/api-docs`
+
+---
+
+## **Technical Specifications**
+
+- **Framework:** NestJS
+- **Language:** TypeScript
+- **Database:** PostgreSQL
+- **ORM:** TypeORM
+
+---
+
+## **Core Features**
+
+1. **API Endpoint to Accept FXQL Statements**:
+   - Parse and validate FXQL syntax.
+   - Respond with success or error messages.
+   - Save valid FXQL data in the database.
+
+2. **Validation Rules**:
+   - FXQL statements must follow a strict syntax.
+   - Each statement must include valid currency pairs, buy/sell rates, and cap amounts.
+
+3. **Database Storage**:
+   - Parsed and validated FXQL data is stored in PostgreSQL for future reference.
+
+---
+
+## **Installation Instructions**
+
+### Prerequisites
+
+- Node.js v16+ installed.
+- PostgreSQL server running.
+
+### Environment Variables
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+DB_HOST=
+DB_PORT=
+DB_USERNAME=
+DB_PASSWORD=
+DB_NAME=
+API_KEYS=
 ```
 
-## Running the app
+### Install Dependencies
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Test
+## **API Endpoints**
+
+### **POST** `/fxql-statements`
+
+Accepts FXQL statements for parsing and validation.
+
+#### Request Body
+
+```json
+{
+  "FXQL": "USD-GBP {\n  BUY 100\n  SELL 200\n  CAP 93800\n}"
+}
+```
+
+#### Success Response (200 OK)
+
+```json
+{
+  "message": "FXQL Statement Parsed Successfully.",
+  "code": "FXQL-200",
+  "data": [
+    {
+      "EntryId": "a12bc345-d67e-8f90-gh12-34567ijkl890",,
+      "SourceCurrency": "USD",
+      "DestinationCurrency": "GBP",
+      "SellPrice": 200,
+      "BuyPrice": 100,
+      "CapAmount": 93800
+    }
+  ]
+}
+```
+
+#### Error Response (4XX/5XX)
+
+```json
+{
+  "message": "Invalid FXQL statement: 'usd' should be 'USD'",
+  "code": "FXQL-400"
+}
+```
+
+---
+
+## **Validation Rules**
+
+1. **Currency Pair**:
+   - Must be exactly 3 uppercase characters (e.g., USD, GBP).
+   - Invalid: `usd`, `US`, `USDT`.
+
+2. **Buy/Sell Amount**:
+   - Numeric value.
+   - Positive float for `BUY` and `SELL`.
+   - Invalid: Negative values, non-numeric strings.
+
+3. **Cap Amount**:
+   - Positive integer or zero.
+   - Indicates the maximum transaction amount.
+
+4. **Structure**:
+   - Statements must have valid formatting.
+   - Multiple statements separated by a single newline.
+
+---
+
+## **Database Schema**
+
+### `fxql_entry` Table
+
+| Column              | Type        | Description                              |
+|---------------------|-------------|------------------------------------------|
+| `EntryId`                | UUID        | Primary key                              |
+| `sourceCurrency`   | VARCHAR(3)  | Source currency (e.g., USD)              |
+| `destinationCurrency` | VARCHAR(3)  | Destination currency (e.g., GBP)       |
+| `buyPrice`         | DECIMAL     | Buy rate                                 |
+| `sellPrice`        | DECIMAL     | Sell rate                                |
+| `capAmount`        | INTEGER     | Maximum transaction cap                  |
+| `createdAt`        | TIMESTAMP   | Record creation timestamp                |
+
+---
+
+## **How to Run**
+
+### Start the Server
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run start:dev
 ```
 
-## Support
+### Access the API in Local Environment
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- API Base URL: `http://localhost:${PORT}/api-docs`
 
-## Stay in touch
+---
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## **Testing**
 
-## License
+Run the test suite:
 
-Nest is [MIT licensed](LICENSE).
+```bash
+npm test
+```

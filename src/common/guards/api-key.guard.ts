@@ -1,4 +1,5 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { CustomForbiddenException } from '../exceptions/custom.exceptions';
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
@@ -10,7 +11,7 @@ export class ApiKeyGuard implements CanActivate {
     const apiKey = request.headers['x-api-key'];
 
     if (!apiKey || !this.validApiKeys.includes(apiKey)) {
-      throw new ForbiddenException('Invalid API key');
+      throw new CustomForbiddenException('Invalid API key');
     }
 
     return true;
