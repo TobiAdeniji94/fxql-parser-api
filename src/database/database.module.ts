@@ -15,8 +15,8 @@ dotenv.config();
             password: process.env.DB_PASSWORD,
             database: process.env.DB_DATABASE,
             entities: [FxqlEntry],
-            synchronize: false,
-            autoLoadEntities: false,
+            synchronize: true,
+            autoLoadEntities: true,
             extra: {
                 ssl: {
                     rejectUnauthorized: false,

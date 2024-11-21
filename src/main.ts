@@ -16,6 +16,10 @@ async function bootstrap() {
     .setDescription('API documentation for FXQL service')
     .setVersion('1.0')
     .addTag('fxql')
+    .addApiKey(
+      { type: 'apiKey', name: 'x-api-key', in: 'header' },
+      'x-api-key',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
