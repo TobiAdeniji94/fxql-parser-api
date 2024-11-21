@@ -70,9 +70,11 @@ The **FXQL Parser API** is a robust and scalable backend service that processes 
    ```
 
 2. Access the application:
-   - API: [http://localhost:${PORT}/fxql-statements](http://localhost:5000/fxql-statements)
-   - Swagger Docs: [http://localhost:${PORT}/api-docs](http://localhost:5000/docs)
-   - Deployed API Base URL: `https://fxql-backend-akjc.onrender.com/`
+  - Deployed API Base URL: [`https://fxql-backend-akjc.onrender.com`](`https://fxql-backend-akjc.onrender.com`)
+  - Swagger Docs (Deployed): [`https://fxql-backend-akjc.onrender.com/api-docs`](https://fxql-backend-akjc.onrender.com/api-docs)
+  - API in Local Environment: http://localhost:${PORT}/fxql-statements
+  - Swagger Docs in Local Environment: http://localhost:${PORT}/api-docs
+  
 ---
 
 ## API Documentation
