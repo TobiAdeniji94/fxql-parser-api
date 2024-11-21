@@ -1,4 +1,4 @@
-# FXQL Parser API
+# Foreign Exchange Query Language Parser API
 
 The **FXQL Parser API** is a robust and scalable backend service that processes and validates FXQL (Foreign Exchange Query Language) statements, saves valid entries to a database, and provides a rate-limited, API-key-protected endpoint for external use.
 
