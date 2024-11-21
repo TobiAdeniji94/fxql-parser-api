@@ -4,7 +4,7 @@ import { CustomForbiddenException } from '../exceptions/custom.exceptions';
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
   // replace with environment variables
-  private readonly validApiKeys = process.env.API_KEYS?.split(',') || ['key1', 'key2', 'key3'];
+  private readonly validApiKeys = process.env.API_KEYS?.split(',');
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();

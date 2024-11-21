@@ -4,7 +4,6 @@ import { DatabaseModule } from './database/database.module';
 import { FxqlModule } from './fxql/fxql.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { ApiKeyGuard } from './common/guards/api-key.guard';
 
 @Module({
   imports: [
