@@ -18,24 +18,19 @@ export class FxqlController {
     description: 'Successfully processed FXQL statements.',
     schema: {
       example: {
-        message: 'Rates Parsed Successfully.',
-        code: 'FXQL-200',
+        message : "Rates Parsed Successfully.",
+        code: "FXQL-200",
         data: [
           {
-            sourceCurrency: 'USD',
-            destinationCurrency: 'GBP',
+            sourceCurrency: "USD",
+            destinationCurrency: "GBP",
             buyPrice: 0.85,
             sellPrice: 0.9,
             capAmount: 10000,
-          },
-          {
-            sourceCurrency: 'EUR',
-            destinationCurrency: 'JPY',
-            buyPrice: 145.2,
-            sellPrice: 146.5,
-            capAmount: 50000,
-          },
-        ],
+            EntryId: "91814778-0de1-4bb6-9859-0c685dd47cef",
+            createdAt: "2024-11-21T08:25:25.020Z"
+          }
+        ]
       },
     },
   })
@@ -44,7 +39,7 @@ export class FxqlController {
     description: 'Invalid input or FXQL statements.',
     schema: {
       example: {
-        message: 'FXQL statement(s) are not in the correct format.',
+        message: 'No valid FXQL statements found',
         code: 'FXQL-400',
       },
     },

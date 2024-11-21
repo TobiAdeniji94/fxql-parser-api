@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { FxqlEntry } from './entities/fxql-entry.entity';
 import { CreateFxqlDto } from './dto/create-fxql.dto';
 import { ResponseMessage, responseMessage } from '../common/response-message';
+import { validCurrencies } from '../common/constants/valid-currencies';
 
 @Injectable()
 export class FxqlService {
@@ -22,7 +23,7 @@ export class FxqlService {
         try {
             this.logger.log('Processing FXQL statements'); // log start of process
 
-            const decodedFxql = createFxqlDto.FXQL.replace(/\\/g, "\n");
+            const decodedFxql = createFxqlDto.FXQL.replace(/\\n/g, '\n').trim();
 
             const fxqlResponse = this.parseFxql(decodedFxql);
 
@@ -33,6 +34,7 @@ export class FxqlService {
             }
 
             const fxqlStatements = fxqlResponse.data as any[];
+
             if (!fxqlStatements || fxqlStatements.length === 0) {
                 this.logger.warn('No valid FXQL statements found.');
                 return responseMessage('No valid FXQL statements found.', 'FXQL-400'); 
@@ -76,11 +78,11 @@ export class FxqlService {
     // method to parse the FXQL string and extract the relevant data
     private parseFxql(fxql: string): ResponseMessage {
         try {
-            fxql = fxql.trim().toUpperCase();
             this.logger.log('Parsing FXQL statements');
 
             const statements: any[] = [];
-            const fxqlRegex = /([A-Z]{3})-([A-Z]{3})\s*\{\s*BUY\s*(\d+(\.\d+)?)\s*SELL\s*(\d+(\.\d+)?)\s*CAP\s*(\d+)\s*\}/g;
+            const fxqlRegex =
+                /([A-Z]{3})-([A-Z]{3})\s*\{\s*BUY\s*(\d+(\.\d+)?)(?:\s|\n)*SELL\s*(\d+(\.\d+)?)(?:\s|\n)*CAP\s*(\d+)\s*\}/g;
             let match;
 
             while ((match = fxqlRegex.exec(fxql)) !== null) {
@@ -130,8 +132,7 @@ export class FxqlService {
         sellPrice: string,
         capAmount: string,
     ): boolean {
-        try {
-            const validCurrencies = ['USD', 'GBP', 'EUR'];
+            // const validCurrencies = ['USD', 'GBP', 'EUR', 'NGN', 'JPY'];
             const isValid = validCurrencies.includes(sourceCurrency) &&
                 validCurrencies.includes(destinationCurrency) &&
                 !isNaN(parseFloat(buyPrice)) &&
@@ -144,9 +145,5 @@ export class FxqlService {
             }
             
             return isValid;
-        } catch (error) {
-            this.logger.error('Error validating FXQL entry', error.stack);
-            return false;   
-        }   
     }
 }

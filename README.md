@@ -173,7 +173,7 @@ API_KEYS=
 ## How It Works
 
 1. **API Key Authentication**:
-   - The `ApiKeyGuard` checks the `x-api-key` header and validates it against the keys in `process.env.API_KEYS`. Use key1,key2,key3 as the value for API_KEYS in .env to test the Deployed API Base URL. You can make it what you want in your local environment.
+   - The `ApiKeyGuard` checks the `x-api-key` header and validates it against the keys in `process.env.API_KEYS`. Use key1,key2,key3 as the value for API_KEYS in .env to test the Deployed API Base URL. In your local environment, you can use any value for API_KEYS.
 
 2. **Parsing FXQL Statements**:
    - The `FxqlService` uses a regex to parse FXQL statements and validate them against specific rules (e.g., valid currencies, numeric buy/sell prices).
