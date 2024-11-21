@@ -88,7 +88,7 @@ Processes FXQL statements, validates them, and saves valid entries to the databa
 #### **Request Body**:
 ```json
 {
-  "FXQL": "USD-GBP {\n  BUY 0.85\n  SELL 0.90\n  CAP 10000\n}\n\nEUR-JPY {\n  BUY 145.20\n  SELL 146.50\n  CAP 50000\n}\n\nNGN-USD {\n  BUY 0.0022\n  SELL 0.0023\n  CAP 2000000\n}"
+  "FXQL": "USD-GBP {\n  BUY 0.85\n  SELL 0.90\n  CAP 10000\n}"
 }
 ```
 
@@ -105,22 +105,10 @@ Processes FXQL statements, validates them, and saves valid entries to the databa
         "destinationCurrency": "GBP",
         "buyPrice": 0.85,
         "sellPrice": 0.9,
-        "capAmount": 10000
+        "capAmount": 10000,
+        "EntryId": "ce8f6d9f-c002-4fa3-b0c3-22777b7a06b6",
+        "createdAt": "2024-11-21T02:06:36.435Z"
       },
-      {
-        "sourceCurrency": "EUR",
-        "destinationCurrency": "JPY",
-        "buyPrice": 145.2,
-        "sellPrice": 146.5,
-        "capAmount": 50000
-      },
-      {
-        "sourceCurrency": "NGN",
-        "destinationCurrency": "USD",
-        "buyPrice": 0.0022,
-        "sellPrice": 0.0023,
-        "capAmount": 2000000
-      }
     ]
   }
   ```
