@@ -85,7 +85,7 @@ The **FXQL Parser API** is a robust and scalable backend service that processes 
 Processes FXQL statements, validates them, and saves valid entries to the database.
 
 #### **Headers**:
-- `x-api-key`: Required. A valid API key.
+- `x-api-key`: Required. A valid API key. Go to [How It Works](#how-it-works) to find out how it works.
 
 #### **Request Body**:
 ```json
