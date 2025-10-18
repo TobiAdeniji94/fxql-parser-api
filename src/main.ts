@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as dotenv from 'dotenv';
@@ -8,6 +9,15 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.use(helmet());
+
+  // Enable global validation pipe to enforce DTO decorators
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
   dotenv.config();
   

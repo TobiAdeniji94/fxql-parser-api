@@ -17,11 +17,13 @@ dotenv.config();
             entities: [FxqlEntry],
             synchronize: true,
             autoLoadEntities: true,
-            extra: {
-                ssl: {
-                    rejectUnauthorized: false,
-                },
-            }
+            extra: process.env.DB_SSL_ENABLED === 'true'
+                ? {
+                    ssl: {
+                        rejectUnauthorized: false,
+                    },
+                }
+                : {},
         }),
     ],
 })

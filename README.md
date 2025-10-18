@@ -151,6 +151,7 @@ DB_PORT=
 DB_USERNAME=
 DB_PASSWORD=
 DB_NAME=
+DB_SSL_ENABLED=       # Set to 'true' for production/hosted databases, 'false' for local development
 API_KEYS=
 ```
 
