@@ -160,6 +160,10 @@ API_KEYS=
 # Redis Configuration (Optional - for distributed rate limiting)
 REDIS_ENABLED=false   # Set to 'true' to enable Redis-backed rate limiting
 REDIS_URL=redis://localhost:6379
+
+# Logging Configuration
+LOG_LEVEL=info        # Options: error, warn, info, debug, trace
+NODE_ENV=development  # Set to 'production' for JSON logs, 'development' for pretty logs
 ```
 
 ---
@@ -345,6 +349,186 @@ The API uses granular error codes for better client handling:
   ],
   "timestamp": "2025-10-18T14:30:00.000Z"
 }
+```
+
+---
+
+## Structured Logging
+
+The API uses **Pino** for high-performance structured JSON logging with request tracking:
+
+**Features:**
+- Automatic request ID generation (`X-Request-Id` header)
+- Masked API keys in logs (shows first/last 4 chars)
+- Structured JSON output in production
+- Pretty-printed colorized logs in development
+- Contextual logging (method, URL, status, duration)
+
+**Log Levels:**
+- `error` - HTTP 500+ errors
+- `warn` - HTTP 400-499 errors
+- `info` - HTTP 200-399 responses
+
+**Environment Variable:**
+```env
+LOG_LEVEL=info  # Options: error, warn, info, debug, trace
+```
+
+**Sample Log Output (Production):**
+```json
+{
+  "level": 30,
+  "time": 1697654400000,
+  "pid": 12345,
+  "hostname": "api-server",
+  "req": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "method": "POST",
+    "url": "/v1/fxql-statements",
+    "apiKey": "fxql...3a7f",
+    "userAgent": "Mozilla/5.0...",
+    "remoteAddress": "192.168.1.1"
+  },
+  "res": {
+    "statusCode": 200,
+    "requestId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "responseTime": 45,
+  "msg": "request completed"
+}
+```
+
+---
+
+## Prometheus Metrics
+
+The API exposes Prometheus-compatible metrics at `/metrics` for monitoring:
+
+**Available Metrics:**
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `fxql_requests_total` | Counter | Total requests by method, endpoint, status |
+| `fxql_requests_success_total` | Counter | Successful requests by API key |
+| `fxql_requests_failure_total` | Counter | Failed requests by API key and error code |
+| `fxql_entries_parsed_total` | Counter | Parsed entries by currency pair |
+| `fxql_rate_limit_exceeded_total` | Counter | Rate limit violations by API key |
+| `fxql_idempotency_hits_total` | Counter | Idempotency cache hits |
+| `fxql_request_duration_seconds` | Histogram | Request latency distribution |
+| `fxql_database_query_duration_seconds` | Histogram | Database query duration |
+| `fxql_active_connections` | Gauge | Current active connections |
+
+**Accessing Metrics:**
+```bash
+curl http://localhost:5000/metrics
+```
+
+**Example Output:**
+```
+# HELP fxql_requests_total Total number of FXQL requests
+# TYPE fxql_requests_total counter
+fxql_requests_total{method="POST",endpoint="/v1/fxql-statements",status_code="200",api_key="fxql...3a7f"} 1523
+
+# HELP fxql_request_duration_seconds Duration of FXQL requests in seconds
+# TYPE fxql_request_duration_seconds histogram
+fxql_request_duration_seconds_bucket{method="POST",endpoint="/v1/fxql-statements",status_code="200",le="0.005"} 45
+fxql_request_duration_seconds_bucket{method="POST",endpoint="/v1/fxql-statements",status_code="200",le="0.01"} 120
+...
+```
+
+**Integration:**
+Configure your Prometheus server to scrape:
+```yaml
+scrape_configs:
+  - job_name: 'fxql-api'
+    static_configs:
+      - targets: ['api.example.com:5000']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+```
+
+---
+
+## API Key Management
+
+The API supports advanced API key management with scopes, rotation, and expiration:
+
+**Features:**
+- SHA-256 hashed key storage (secure)
+- Scoped permissions (`read`, `write`, `admin`)
+- Key expiration and rotation
+- Usage tracking (last used timestamp)
+- Key revocation
+
+**Key Scopes:**
+- `read` - Read-only operations
+- `write` - Create/update operations
+- `admin` - Full access including key management
+
+**Database Schema (`api_keys` table):**
+- `id` - Unique key identifier
+- `keyHash` - SHA-256 hash of the key
+- `name` - Friendly name
+- `scopes` - Array of permissions
+- `status` - `active`, `revoked`, `expired`
+- `expiresAt` - Optional expiration date
+- `lastUsedAt` - Last usage timestamp
+- `lastRotatedAt` - Last rotation timestamp
+
+**API Key Format:**
+```
+fxql_<64_hex_characters>
+```
+
+Example: `fxql_a1b2c3d4e5f6...`
+
+**Migration Note:**
+Run `npm run migration:run` to create the `api_keys` table. Existing environment variable keys (`.env` `API_KEYS`) continue to work for backward compatibility.
+
+---
+
+## Audit Logging
+
+All API requests and security events are logged to the `audit_logs` table for compliance:
+
+**Tracked Events:**
+- `api_request` - All API requests
+- `api_key_created` - New API key generation
+- `api_key_rotated` - Key rotation
+- `api_key_revoked` - Key revocation
+- `rate_limit_exceeded` - Rate limit violations
+- `authentication_failed` - Auth failures
+- `validation_error` - Validation errors
+
+**Audit Log Fields:**
+- `id` - Unique log ID
+- `action` - Event type
+- `apiKeyId` - Associated API key
+- `requestId` - Request trace ID
+- `method`, `endpoint`, `statusCode` - Request details
+- `errorCode` - Error identifier
+- `requestPayloadHash` - SHA-256 hash of request body
+- `metadata` - Additional context (JSON)
+- `ipAddress`, `userAgent` - Client info
+- `createdAt` - Timestamp
+
+**Benefits:**
+- Compliance audit trail
+- Security incident investigation
+- Usage analytics
+- Debugging support
+
+**Query Examples:**
+```sql
+-- Get all failed authentication attempts
+SELECT * FROM audit_logs 
+WHERE action = 'authentication_failed' 
+ORDER BY "createdAt" DESC LIMIT 100;
+
+-- Get activity for specific API key
+SELECT * FROM audit_logs 
+WHERE "apiKeyId" = 'uuid-here' 
+ORDER BY "createdAt" DESC;
 ```
 
 ---

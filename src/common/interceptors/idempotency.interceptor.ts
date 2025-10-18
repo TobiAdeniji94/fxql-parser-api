@@ -3,14 +3,20 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
+  Inject,
+  Optional,
 } from '@nestjs/common';
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { IdempotencyService } from '../services/idempotency.service';
+import { MetricsService } from '../services/metrics.service';
 
 @Injectable()
 export class IdempotencyInterceptor implements NestInterceptor {
-  constructor(private readonly idempotencyService: IdempotencyService) {}
+  constructor(
+    private readonly idempotencyService: IdempotencyService,
+    @Optional() private readonly metricsService?: MetricsService,
+  ) {}
 
   async intercept(
     context: ExecutionContext,
@@ -34,6 +40,11 @@ export class IdempotencyInterceptor implements NestInterceptor {
     );
 
     if (cached) {
+      // Track idempotency cache hit
+      if (this.metricsService) {
+        this.metricsService.incrementIdempotencyHits(apiKey);
+      }
+      
       // Return cached response
       response.status(cached.statusCode);
       response.setHeader('X-Idempotency-Replayed', 'true');

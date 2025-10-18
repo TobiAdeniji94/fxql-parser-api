@@ -4,6 +4,8 @@ import { CreateFxqlDto } from './dto/create-fxql.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiSecurity, ApiHeader } from '@nestjs/swagger';
 import { ApiKeyGuard } from '../common/guards/api-key.guard';
 import { IdempotencyInterceptor } from '../common/interceptors/idempotency.interceptor';
+import { MetricsInterceptor } from '../common/interceptors/metrics.interceptor';
+import { AuditInterceptor } from '../common/interceptors/audit.interceptor';
 
 @ApiTags('fxql')
 @ApiSecurity('x-api-key')
@@ -13,7 +15,7 @@ export class FxqlController {
 
   @Post()
   @UseGuards(ApiKeyGuard)
-  @UseInterceptors(IdempotencyInterceptor)
+  @UseInterceptors(IdempotencyInterceptor, MetricsInterceptor, AuditInterceptor)
   @ApiOperation({ summary: 'Process FXQL statements' })
   @ApiHeader({
     name: 'Idempotency-Key',

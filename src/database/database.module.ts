@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FxqlEntry } from '../fxql/entities/fxql-entry.entity';
 import { IdempotencyRecord } from '../common/entities/idempotency-record.entity';
+import { ApiKey } from '../common/entities/api-key.entity';
+import { AuditLog } from '../common/entities/audit-log.entity';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -15,7 +17,7 @@ dotenv.config();
             username: process.env.DB_USERNAME,
             password: process.env.DB_PASSWORD,
             database: process.env.DB_DATABASE,
-            entities: [FxqlEntry, IdempotencyRecord],
+            entities: [FxqlEntry, IdempotencyRecord, ApiKey, AuditLog],
             synchronize: false, // Disabled - use migrations instead
             autoLoadEntities: true,
             migrations: ['dist/database/migrations/*.js'],
