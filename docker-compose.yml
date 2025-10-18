@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   # ===================================
   # NestJS Application
@@ -63,7 +61,6 @@ services:
       POSTGRES_USER: ${DB_USERNAME:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       POSTGRES_DB: ${DB_DATABASE:-fxql_db}
-      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     volumes:

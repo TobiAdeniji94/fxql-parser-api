@@ -8,6 +8,11 @@ export class AddTablePartitioning1729261000000 implements MigrationInterface {
     // Step 1: Rename existing table
     await queryRunner.query(`ALTER TABLE fxql_entries RENAME TO fxql_entries_old`);
 
+    // Step 1b: Drop legacy indexes to avoid name collisions when recreating
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_FXQL_CURRENCIES_CREATED"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_FXQL_SOURCE_CURRENCY"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_FXQL_DEST_CURRENCY"`);
+
     // Step 2: Create new partitioned parent table
     await queryRunner.query(`
       CREATE TABLE fxql_entries (
@@ -46,18 +51,18 @@ export class AddTablePartitioning1729261000000 implements MigrationInterface {
 
     // Step 4: Create composite index on partitioned table
     await queryRunner.query(`
-      CREATE INDEX "IDX_FXQL_CURRENCIES_CREATED" 
+      CREATE INDEX IF NOT EXISTS "IDX_FXQL_CURRENCIES_CREATED" 
       ON fxql_entries ("sourceCurrency", "destinationCurrency", "createdAt");
     `);
 
     // Step 5: Create index on individual currency lookups
     await queryRunner.query(`
-      CREATE INDEX "IDX_FXQL_SOURCE_CURRENCY" 
+      CREATE INDEX IF NOT EXISTS "IDX_FXQL_SOURCE_CURRENCY" 
       ON fxql_entries ("sourceCurrency");
     `);
 
     await queryRunner.query(`
-      CREATE INDEX "IDX_FXQL_DEST_CURRENCY" 
+      CREATE INDEX IF NOT EXISTS "IDX_FXQL_DEST_CURRENCY" 
       ON fxql_entries ("destinationCurrency");
     `);
 

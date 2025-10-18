@@ -9,8 +9,12 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install all dependencies (including dev)
-RUN npm ci --quiet
+# Install dependencies (prefer lockfile when present)
+RUN if [ -f package-lock.json ]; then \
+      npm ci --quiet; \
+    else \
+      npm install --quiet; \
+    fi
 
 # Copy source code
 COPY . .
@@ -33,6 +37,9 @@ WORKDIR /app
 COPY --from=builder --chown=node:node /app/dist ./dist
 COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 COPY --from=builder --chown=node:node /app/package*.json ./
+COPY --from=builder --chown=node:node /app/tsconfig.json ./tsconfig.json
+COPY --from=builder --chown=node:node /app/tsconfig.build.json ./tsconfig.build.json
+COPY --from=builder --chown=node:node /app/nest-cli.json ./nest-cli.json
 COPY --chown=node:node config ./config
 
 # Switch to non-root user provided by base image
