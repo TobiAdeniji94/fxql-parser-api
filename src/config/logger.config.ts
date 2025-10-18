@@ -39,9 +39,13 @@ export const loggerConfig: Params = {
         };
       },
       res(res) {
+        const requestId = typeof res.getHeader === 'function'
+          ? res.getHeader('x-request-id')
+          : res.headers?.['x-request-id'] ?? res.request?.id ?? res.req?.id;
+
         return {
           statusCode: res.statusCode,
-          requestId: res.getHeader('x-request-id'),
+          requestId,
         };
       },
     },
