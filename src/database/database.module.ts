@@ -15,8 +15,10 @@ dotenv.config();
             password: process.env.DB_PASSWORD,
             database: process.env.DB_DATABASE,
             entities: [FxqlEntry],
-            synchronize: true,
+            synchronize: false, // Disabled - use migrations instead
             autoLoadEntities: true,
+            migrations: ['dist/database/migrations/*.js'],
+            migrationsRun: true, // Auto-run pending migrations on startup
             extra: process.env.DB_SSL_ENABLED === 'true'
                 ? {
                     ssl: {

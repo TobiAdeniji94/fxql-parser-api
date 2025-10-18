@@ -72,14 +72,14 @@ The **Foreign Exchange Query Language (FXQL) Parser API** is a robust and scalab
 2. Access the application:
   - Deployed API Base URL: [`https://fxql-backend-akjc.onrender.com`](https://fxql-backend-akjc.onrender.com)
   - Swagger Docs (Deployed): [`https://fxql-backend-akjc.onrender.com/api-docs`](https://fxql-backend-akjc.onrender.com/api-docs)
-  - API in Local Environment: http://localhost:${PORT}/fxql-statements
+  - API in Local Environment: http://localhost:${PORT}/v1/fxql-statements
   - Swagger Docs in Local Environment: http://localhost:${PORT}/api-docs
   
 ---
 
 ## API Documentation
 
-### **Endpoint**: `POST /fxql-statements`
+### **Endpoint**: `POST /v1/fxql-statements`
 
 #### **Description**:
 Processes FXQL statements, validates them, and saves valid entries to the database.
@@ -189,6 +189,48 @@ API_KEYS=
 
 5. **Rate Limiting**:
    - The `ThrottlerModule` limits requests to 10 per minute per API key.
+
+---
+
+## Database Migrations
+
+This project uses TypeORM migrations for production-safe schema management. Auto-sync is disabled in favor of versioned migrations.
+
+### **Running Migrations**:
+```bash
+# Run pending migrations
+npm run migration:run
+
+# Revert last migration
+npm run migration:revert
+
+# Generate a new migration based on entity changes
+npm run migration:generate -- src/database/migrations/MigrationName
+
+# Create a blank migration file
+npm run migration:create -- src/database/migrations/MigrationName
+```
+
+**Note:** Migrations are automatically run on application startup via `migrationsRun: true`.
+
+---
+
+## Validation Configuration
+
+Business rules, currency codes, and rate limits are externalized in `config/validation-rules.yaml`. This allows hot-reloadable updates without code changes.
+
+**Configuration file location:** `config/validation-rules.yaml`
+
+**Versioning:** The config file includes a version field for tracking changes.
+
+---
+
+## API Versioning
+
+All API endpoints are prefixed with `/v1` to support future versioning:
+- Current version: **v1.0**
+- Base path: `/v1`
+- Example: `POST /v1/fxql-statements`
 
 ---
 

@@ -4,19 +4,17 @@ import { Repository } from 'typeorm';
 import { FxqlEntry } from './entities/fxql-entry.entity';
 import { CreateFxqlDto } from './dto/create-fxql.dto';
 import { ResponseMessage, responseMessage } from '../common/response-message';
-import { validCurrencies } from '../common/constants/valid-currencies';
+import { ValidationConfigService } from '../config/validation-config.service';
 
 @Injectable()
 export class FxqlService {
-    private readonly logger = new Logger(FxqlService.name); // Add Logger instance
+    private readonly logger = new Logger(FxqlService.name);
 
     constructor(
         @InjectRepository(FxqlEntry)
         private readonly fxqlRepository: Repository<FxqlEntry>,
+        private readonly validationConfig: ValidationConfigService,
     ) {}
-
-    // max number of currency pairs per request
-    private readonly MAX_CURRENCY_PAIRS = 1000;
 
     // method to handle the parsing and saving of FXQL statements
     async processFxqlStatements(createFxqlDto: CreateFxqlDto): Promise<ResponseMessage> {
@@ -41,10 +39,11 @@ export class FxqlService {
             }
 
             // check if the number of currency pairs exceeds the limit
-            if (fxqlStatements.length > this.MAX_CURRENCY_PAIRS) {
+            const maxPairs = this.validationConfig.maxCurrencyPairsPerRequest;
+            if (fxqlStatements.length > maxPairs) {
                 this.logger.warn(`Exceeded max currency pairs limit. Count: ${fxqlStatements.length}`);
                 return responseMessage(
-                    `Exceeded maximum currency pairs limit. A maximum of ${this.MAX_CURRENCY_PAIRS} currency pairs are allowed per request.`,
+                    `Exceeded maximum currency pairs limit. A maximum of ${maxPairs} currency pairs are allowed per request.`,
                     'FXQL-400',
                 );
             }
@@ -132,13 +131,19 @@ export class FxqlService {
         sellPrice: string,
         capAmount: string,
     ): boolean {
-            // const validCurrencies = ['USD', 'GBP', 'EUR', 'NGN', 'JPY'];
-            const isValid = validCurrencies.includes(sourceCurrency) &&
-                validCurrencies.includes(destinationCurrency) &&
-                !isNaN(parseFloat(buyPrice)) &&
-                !isNaN(parseFloat(sellPrice)) &&
-                !isNaN(parseInt(capAmount, 10)) &&
-                parseInt(capAmount, 10) >= 0;
+            const buy = parseFloat(buyPrice);
+            const sell = parseFloat(sellPrice);
+            const cap = parseInt(capAmount, 10);
+
+            const isValid =
+                this.validationConfig.isCurrencyValid(sourceCurrency) &&
+                this.validationConfig.isCurrencyValid(destinationCurrency) &&
+                !isNaN(buy) &&
+                !isNaN(sell) &&
+                !isNaN(cap) &&
+                this.validationConfig.isPriceValid(buy) &&
+                this.validationConfig.isPriceValid(sell) &&
+                this.validationConfig.isCapAmountValid(cap);
 
             if (!isValid) {
                 this.logger.debug(`Invalid entry: ${sourceCurrency}-${destinationCurrency}, BUY: ${buyPrice}, SELL: ${sellPrice}, CAP: ${capAmount}`);

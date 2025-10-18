@@ -10,6 +10,9 @@ async function bootstrap() {
 
   app.use(helmet());
 
+  // Set global API version prefix
+  app.setGlobalPrefix('v1');
+
   // Enable global validation pipe to enforce DTO decorators
   app.useGlobalPipes(
     new ValidationPipe({
