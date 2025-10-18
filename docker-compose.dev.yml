@@ -1,0 +1,76 @@
+version: '3.9'
+
+services:
+  # ===================================
+  # Development Override
+  # ===================================
+  app:
+    build:
+      target: builder
+    command: npm run start:dev
+    environment:
+      # Override for development
+      NODE_ENV: development
+      LOG_LEVEL: debug
+      
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: fxql_dev
+      DB_SSL_ENABLED: false
+      
+      # Redis
+      REDIS_ENABLED: true
+      REDIS_URL: redis://redis:6379
+    volumes:
+      # Hot reload - mount source code
+      - ./src:/app/src
+      - ./config:/app/config
+      - ./test:/app/test
+      
+      # Configuration files for hot reload
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.build.json:/app/tsconfig.build.json
+      - ./nest-cli.json:/app/nest-cli.json
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      
+      # Prevent node_modules override
+      - /app/node_modules
+      - /app/dist
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1024M
+    ports:
+      - "5000:5000"
+      - "9229:9229"  # Node.js debug port
+    healthcheck:
+      # Faster health checks in development
+      interval: 10s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+  postgres:
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fxql_dev
+    healthcheck:
+      # Faster checks in development
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  redis:
+    ports:
+      - "6379:6379"
+    # Remove persistence in dev for faster restarts
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes: []  # Override - no persistence in dev

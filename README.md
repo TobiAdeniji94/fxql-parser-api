@@ -62,18 +62,46 @@ The **Foreign Exchange Query Language (FXQL) Parser API** is a robust and scalab
 
 ## Setup
 
-### **Running with Docker**
+### **Running with Docker** 🐳
 
-1. Build and start the application:
-   ```bash
-   docker-compose up --build
-   ```
+The application is fully containerized with **production-ready** Docker support including Redis, PostgreSQL, and the NestJS API.
 
-2. Access the application:
-  - Deployed API Base URL: [`https://fxql-backend-akjc.onrender.com`](https://fxql-backend-akjc.onrender.com)
-  - Swagger Docs (Deployed): [`https://fxql-backend-akjc.onrender.com/api-docs`](https://fxql-backend-akjc.onrender.com/api-docs)
-  - API in Local Environment: http://localhost:${PORT}/v1/fxql-statements
-  - Swagger Docs in Local Environment: http://localhost:${PORT}/api-docs
+#### Quick Start (Production)
+```bash
+# Build and start all services
+docker-compose up -d
+
+# Run database migrations
+docker-compose exec app npm run migration:run
+
+# View logs
+docker-compose logs -f app
+```
+
+#### Development Mode (Hot Reload)
+```bash
+# Start with hot-reload enabled
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+```
+
+**📖 For comprehensive Docker documentation, see [DOCKER.md](./DOCKER.md)**
+
+**Features:**
+- ✅ Multi-stage production Dockerfile (optimized image size)
+- ✅ Non-root user (security best practice)
+- ✅ Health checks for all services
+- ✅ Resource limits (CPU/Memory)
+- ✅ Redis integration for rate limiting
+- ✅ Volume persistence for data
+- ✅ Development mode with hot-reload
+
+### **Deployed Endpoints**
+
+- **Deployed API Base URL:** [`https://fxql-backend-akjc.onrender.com`](https://fxql-backend-akjc.onrender.com)
+- **Swagger Docs (Deployed):** [`https://fxql-backend-akjc.onrender.com/api-docs`](https://fxql-backend-akjc.onrender.com/api-docs)
+- **API in Local Environment:** http://localhost:5000/v1/fxql-statements
+- **Swagger Docs in Local Environment:** http://localhost:5000/api-docs
+- **Metrics Endpoint:** http://localhost:5000/metrics
   
 ---
 
