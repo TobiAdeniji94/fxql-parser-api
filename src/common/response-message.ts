@@ -1,13 +1,24 @@
+import { FxqlErrorCode, ErrorDetail } from './constants/error-codes';
+
 export interface ResponseMessage {
     message: string;
-    code: string
-    data: object;
+    code: string | FxqlErrorCode;
+    data?: object;
+    details?: ErrorDetail[];
+    timestamp?: string;
 }
 
-export const responseMessage = (message?: string, code?: string, data?: object) => {
+export const responseMessage = (
+    message?: string, 
+    code?: string | FxqlErrorCode, 
+    data?: object,
+    details?: ErrorDetail[]
+): ResponseMessage => {
     return {
         message,
         code,
-        data
+        data,
+        details,
+        timestamp: new Date().toISOString(),
     }
 }

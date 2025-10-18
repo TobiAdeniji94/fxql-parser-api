@@ -5,6 +5,7 @@ import { FxqlEntry } from './entities/fxql-entry.entity';
 import { CreateFxqlDto } from './dto/create-fxql.dto';
 import { ResponseMessage, responseMessage } from '../common/response-message';
 import { ValidationConfigService } from '../config/validation-config.service';
+import { FxqlErrorCode } from '../common/constants/error-codes';
 
 @Injectable()
 export class FxqlService {
@@ -26,7 +27,7 @@ export class FxqlService {
             const fxqlResponse = this.parseFxql(decodedFxql);
 
             // Log if parsing fails
-            if (fxqlResponse.code === "FXQL-400") {
+            if (fxqlResponse.code !== FxqlErrorCode.SUCCESS) {
                 this.logger.warn(`Parsing failed: ${fxqlResponse.message}`);
                 return fxqlResponse;
             }
@@ -35,7 +36,7 @@ export class FxqlService {
 
             if (!fxqlStatements || fxqlStatements.length === 0) {
                 this.logger.warn('No valid FXQL statements found.');
-                return responseMessage('No valid FXQL statements found.', 'FXQL-400'); 
+                return responseMessage('No valid FXQL statements found.', FxqlErrorCode.EMPTY_STATEMENT); 
             }
 
             // check if the number of currency pairs exceeds the limit
@@ -44,7 +45,9 @@ export class FxqlService {
                 this.logger.warn(`Exceeded max currency pairs limit. Count: ${fxqlStatements.length}`);
                 return responseMessage(
                     `Exceeded maximum currency pairs limit. A maximum of ${maxPairs} currency pairs are allowed per request.`,
-                    'FXQL-400',
+                    FxqlErrorCode.EXCEEDS_MAX_PAIRS,
+                    null,
+                    [{ field: 'count', value: fxqlStatements.length, constraint: `max ${maxPairs}`, message: 'Too many currency pairs' }]
                 );
             }
 
@@ -55,21 +58,21 @@ export class FxqlService {
                 this.logger.log(`Successfully saved ${savedEntries.length} FXQL entries.`);
                 return responseMessage(
                     'Rates Parsed Successfully.',
-                    'FXQL-200', 
+                    FxqlErrorCode.SUCCESS, 
                     savedEntries
                 );
             } catch (error) {
                 this.logger.error('Error saving FXQL entries to the database', error.stack);
                 return responseMessage(
                     'An error occurred while saving FXQL entries to the database.',
-                    'FXQL-500-DB',
+                    FxqlErrorCode.DATABASE_ERROR,
                 );
             }
         } catch (error) {
             this.logger.error('Error processing FXQL statements', error.stack);
             return responseMessage(
                 'An unexpected error occurred while processing FXQL statements.',
-                'FXQL-500',
+                FxqlErrorCode.INTERNAL_ERROR,
             );
         }
     }
@@ -97,7 +100,7 @@ export class FxqlService {
                     });
                 } else {
                     this.logger.warn(`Invalid FXQL statement: ${fullMatch}`);
-                    return responseMessage(`Invalid FXQL statement: ${fullMatch}`, "FXQL-400");
+                    return responseMessage(`Invalid FXQL statement: ${fullMatch}`, FxqlErrorCode.INVALID_FORMAT);
                 }
             }
             
@@ -105,21 +108,21 @@ export class FxqlService {
                 this.logger.warn('No valid FXQL statements found during parsing.');
                 return responseMessage(
                     "No valid FXQL statements found.", 
-                    "FXQL-400"
+                    FxqlErrorCode.MALFORMED_SYNTAX
                 );
             }
 
             this.logger.log(`Parsed ${statements.length} FXQL statements successfully.`);
             return responseMessage(
                 "FXQL statements parsed successfully.", 
-                "FXQL-200", 
+                FxqlErrorCode.SUCCESS, 
                 statements
             );
         } catch (error) {
             this.logger.error('Error parsing FXQL statements', error.stack);
             return responseMessage(
                 'An error occurred while parsing FXQL statements.',
-                'FXQL-500',
+                FxqlErrorCode.PARSING_ERROR,
             );
         }
     }

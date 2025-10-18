@@ -1,8 +1,9 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FxqlService } from './fxql.service';
 import { CreateFxqlDto } from './dto/create-fxql.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiSecurity } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiSecurity, ApiHeader } from '@nestjs/swagger';
 import { ApiKeyGuard } from '../common/guards/api-key.guard';
+import { IdempotencyInterceptor } from '../common/interceptors/idempotency.interceptor';
 
 @ApiTags('fxql')
 @ApiSecurity('x-api-key')
@@ -12,7 +13,13 @@ export class FxqlController {
 
   @Post()
   @UseGuards(ApiKeyGuard)
-  @ApiOperation({ summary: 'Process FXQL statements' }) 
+  @UseInterceptors(IdempotencyInterceptor)
+  @ApiOperation({ summary: 'Process FXQL statements' })
+  @ApiHeader({
+    name: 'Idempotency-Key',
+    description: 'Optional unique key to prevent duplicate processing of requests',
+    required: false,
+  }) 
   @ApiResponse({
     status: 200,
     description: 'Successfully processed FXQL statements.',

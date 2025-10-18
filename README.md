@@ -146,13 +146,20 @@ Processes FXQL statements, validates them, and saves valid entries to the databa
 Create a `.env` file in the root directory with the following variables:
 
 ```env
+# Database Configuration
 DB_HOST=
 DB_PORT=
 DB_USERNAME=
 DB_PASSWORD=
 DB_NAME=
 DB_SSL_ENABLED=       # Set to 'true' for production/hosted databases, 'false' for local development
+
+# API Keys (comma-separated)
 API_KEYS=
+
+# Redis Configuration (Optional - for distributed rate limiting)
+REDIS_ENABLED=false   # Set to 'true' to enable Redis-backed rate limiting
+REDIS_URL=redis://localhost:6379
 ```
 
 ---
@@ -231,6 +238,114 @@ All API endpoints are prefixed with `/v1` to support future versioning:
 - Current version: **v1.0**
 - Base path: `/v1`
 - Example: `POST /v1/fxql-statements`
+
+---
+
+## Idempotency Support
+
+The API supports idempotency keys to prevent duplicate processing of requests:
+
+**Usage:**
+```bash
+curl -X POST https://api.example.com/v1/fxql-statements \
+  -H "x-api-key: your-api-key" \
+  -H "Idempotency-Key: unique-request-id-12345" \
+  -H "Content-Type: application/json" \
+  -d '{"FXQL": "USD-EUR { BUY 1.2 SELL 1.3 CAP 5000 }"}'
+```
+
+**Features:**
+- Keys are valid for 24 hours
+- Duplicate requests return the original cached response
+- Response includes `X-Idempotency-Replayed: true` header for replayed responses
+- Automatically cleaned up after expiration
+
+---
+
+## Table Partitioning
+
+The `fxql_entries` table uses PostgreSQL range partitioning by `createdAt` for scalability:
+
+**Partition Strategy:**
+- Monthly partitions (e.g., `fxql_entries_y2025_m10`)
+- Automatic partition creation on startup
+- Manual partition creation: `npm run partition:create`
+
+**Benefits:**
+- Improved query performance for time-range queries
+- Efficient data archival and purging
+- Better index management
+
+**Indexes:**
+- `(sourceCurrency, destinationCurrency, createdAt)` - Currency pair lookups
+- `(sourceCurrency)` - Source currency queries
+- `(destinationCurrency)` - Destination currency queries
+
+---
+
+## Rate Limiting
+
+**Default Limits (In-Memory):**
+- 10 requests per minute per API key
+- 3 requests per second burst limit
+
+**Redis-Backed Rate Limiting (Optional):**
+
+Enable distributed rate limiting with Redis:
+
+```env
+REDIS_ENABLED=true
+REDIS_URL=redis://localhost:6379
+```
+
+**Benefits:**
+- Consistent rate limiting across multiple instances
+- Per-API-key tracking
+- Configurable via `config/validation-rules.yaml`
+
+---
+
+## Error Code Taxonomy
+
+The API uses granular error codes for better client handling:
+
+**Success:**
+- `FXQL-200` - Success
+
+**Validation Errors:**
+- `FXQL_E_INVALID_FORMAT` - Malformed FXQL syntax
+- `FXQL_E_BAD_ISO` - Invalid currency code
+- `FXQL_E_PRICE_OUT_OF_RANGE` - Price exceeds allowed range
+- `FXQL_E_CAP_OUT_OF_RANGE` - Cap amount invalid
+- `FXQL_E_EMPTY_STATEMENT` - No statements provided
+- `FXQL_E_EXCEEDS_MAX_PAIRS` - Too many currency pairs
+- `FXQL_E_MALFORMED_SYNTAX` - Syntax error
+
+**Authentication Errors:**
+- `FXQL_E_MISSING_API_KEY` - API key not provided
+- `FXQL_E_INVALID_API_KEY` - API key invalid
+- `FXQL_E_API_KEY_NOT_CONFIGURED` - Server configuration error
+
+**Server Errors:**
+- `FXQL_E_PARSING_FAILED` - Parsing error
+- `FXQL_E_STORAGE_FAILED` - Database error
+- `FXQL-500` - Internal server error
+
+**Example Error Response:**
+```json
+{
+  "message": "Invalid currency code",
+  "code": "FXQL_E_BAD_ISO",
+  "details": [
+    {
+      "field": "sourceCurrency",
+      "value": "XXX",
+      "message": "Currency code not in ISO 4217 list"
+    }
+  ],
+  "timestamp": "2025-10-18T14:30:00.000Z"
+}
+```
 
 ---
 

@@ -1,5 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { CustomForbiddenException } from '../exceptions/custom.exceptions';
+import { FxqlErrorCode } from '../constants/error-codes';
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
@@ -12,11 +13,25 @@ export class ApiKeyGuard implements CanActivate {
 
     // Handle missing API_KEYS configuration gracefully
     if (!this.validApiKeys || this.validApiKeys.length === 0) {
-      throw new CustomForbiddenException('API key authentication is not configured');
+      throw new CustomForbiddenException(
+        'API key authentication is not configured',
+        FxqlErrorCode.API_KEY_NOT_CONFIGURED,
+      );
     }
 
-    if (!apiKey || !this.validApiKeys.includes(apiKey)) {
-      throw new CustomForbiddenException('Invalid API key');
+    if (!apiKey) {
+      throw new CustomForbiddenException(
+        'API key is required',
+        FxqlErrorCode.MISSING_API_KEY,
+        [{ message: 'Include x-api-key header in your request' }],
+      );
+    }
+
+    if (!this.validApiKeys.includes(apiKey)) {
+      throw new CustomForbiddenException(
+        'Invalid API key',
+        FxqlErrorCode.INVALID_API_KEY,
+      );
     }
 
     return true;
