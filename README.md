@@ -97,7 +97,7 @@ docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
 
 ### **Deployed Endpoints**
 
-- **Deployed API Base URL:** [`https://fxql-backend-akjc.onrender.com`](https://fxql-backend-akjc.onrender.com)
+- **Deployed API Base URL:** [`https://fxql-backend-akjc.onrender.com/v1`](https://fxql-backend-akjc.onrender.com/v1)
 - **Swagger Docs (Deployed):** [`https://fxql-backend-akjc.onrender.com/api-docs`](https://fxql-backend-akjc.onrender.com/api-docs)
 - **API in Local Environment:** http://localhost:5000/v1/fxql-statements
 - **Swagger Docs in Local Environment:** http://localhost:5000/api-docs
@@ -215,7 +215,7 @@ NODE_ENV=development  # Set to 'production' for JSON logs, 'development' for pre
 ## How It Works
 
 1. **API Key Authentication**:
-   - The `ApiKeyGuard` checks the `x-api-key` header and validates it against the keys in `process.env.API_KEYS`. Use key1,key2,key3 as the value for API_KEYS in .env to test the Deployed API Base URL. In your local environment, you can use any value for API_KEYS.
+   - The `ApiKeyGuard` checks the `x-api-key` header and validates it against the keys in `process.env.API_KEYS`. Use key1,key2 or key3 as the value for API_KEYS in .env to test the Deployed API Base URL. In your local environment, you can use any value for API_KEYS.
 
 2. **Parsing FXQL Statements**:
    - The `FxqlService` uses a regex to parse FXQL statements and validate them against specific rules (e.g., valid currencies, numeric buy/sell prices).
